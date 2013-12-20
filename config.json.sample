@@ -1,0 +1,14 @@
+{
+    "log_level"        : "DEBUG",
+    "db_file"          : "dbfile",
+    "http_proxy"       : {},
+    "charset"          : "gbk",
+    "page_min"         : 0,
+    "page_max"         : 20,
+    "task_number"      : 10,
+    "host"             : "",
+    "url_indexpage"    : "",
+    "regular_index"    : "",
+    "format_infourl"   : ""
+}
+
