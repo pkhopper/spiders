@@ -96,9 +96,15 @@ class Spider:
         fp = os.path.join(path, CONFIG.name_format%(hash(url)))
         util.asure_path(os.path.dirname(fp))
         handle = http.DownloadStreamHandler(open(fp, 'w'))
-        html = http.HttpUtil()
-        html.add_header('Referer', referer)
-        html.fetch(url, handle)
+        for kk in [1,2,3]:
+            try:
+                html = http.HttpUtil()
+                html.add_header('Referer', referer)
+                html.fetch(url, handle)
+                break
+            except Exception as e:
+                LOG.exception(e)
+                time.sleep(3)
 
     def get_data(self, items):
         if CONFIG.thread_number == 1:
