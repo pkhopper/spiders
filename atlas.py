@@ -3,9 +3,9 @@
 
 import os
 import threading
-from vavava import httputil as http
 from vavava import util
 from vavava import json_config
+from vavava import httputil as http
 from vavava.spiderutil import SpiderUtil
 
 LOG = util.get_logger()
