@@ -9,6 +9,8 @@ from vavava.httputil import HttpUtil
 from vavava.httputil import DownloadStreamHandler
 from vavava import util
 
+util.set_default_utf8()
+
 class Spider:
     
     CHARSET = r"utf-8"
@@ -96,16 +98,30 @@ class Spider:
 
 if __name__ == "__main__":
     import sys
+    import getopt
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "c:d:p:", ["channel", "duration", "path"])
+    except getopt.GetoptError as err:
+        print str(err)
+        sys.exit(2)
+
+    duration = None
+    channel = u"凤凰中文台"
+    path = os.path.join(os.environ['HOME'], 'Downloads')
+    for o, a in opts:
+        if o in ("-d", "--duration"):
+            duration = float(a)
+        if o in ("-c", "--duration"):
+            channel = a
+        if o in ("-p", "--path"):
+            path = os.path.abspath(a)
+
     ifeng = Spider()
     try:
-        if len(sys.argv) > 1:
-            for i in xrange(0, len(sys.argv)):
-                if sys.argv[i] == __file__:
-                    channel = u"凤凰中文台"
-                    path = os.path.join(os.environ['HOME'], 'Downloads')
-                    print u"[%s %.2fs %s]" % (channel, float(sys.argv[i+1]), path)
-                    util.SignalHandlerBase(callback=lambda : ifeng.download_handle.syn_stop())
-                    ifeng.start_recode(channel, float(sys.argv[i+1]), path)
+        if duration:
+            print u"[%s %.2fs %s]" % (channel, duration, path)
+            util.SignalHandlerBase(callback=lambda : ifeng.download_handle.syn_stop())
+            ifeng.start_recode(channel, duration, path)
             print 'end of download work'
         else:
             print ifeng.get_channel_info()[1]

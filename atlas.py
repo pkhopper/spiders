@@ -56,15 +56,18 @@ class Spider:
         curr_items = []
         achived_tasks = os.listdir(CONFIG.save_path)
         for id in xrange(CONFIG.deapth):
-            if self.event.isSet(): break
-            LOG.info("==> deapth %d", id)
-            if id == 0:
-                curr_items = self._get_index_page()
-            else:
-                curr_items = self._get_index_page(id, curr_items[:1][0][0])
-            for item in curr_items:
-                if item[0] not in achived_tasks:
-                    self.get_data(self._get_item_metadata(item[1], item[0]))
+            try:
+                if self.event.isSet(): break
+                LOG.info("==> deapth %d", id)
+                if id == 0:
+                    curr_items = self._get_index_page()
+                else:
+                    curr_items = self._get_index_page(id, curr_items[:1][0][0])
+                for item in curr_items:
+                    if item[0] not in achived_tasks:
+                        self.get_data(self._get_item_metadata(item[1], item[0]))
+            except Exception as e:
+                LOG.exception(e)
             LOG.info("<== deapth %d", id)
         LOG.info("== end all ==")
 

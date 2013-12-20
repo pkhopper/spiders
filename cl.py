@@ -8,7 +8,6 @@ from vavava import util
 from vavava import sqliteutil
 from vavava import json_config
 
-
 class Config(json_config.SimpleJsonConfig):
     def __init__(self, path):
         json_config.SimpleJsonConfig.__init__(self, path)
@@ -89,8 +88,13 @@ class Spider:
             self.dbpool.stop()
 
 if __name__ == "__main__":
+    import os
     global CONFIG
-    CONFIG = Config.parse_config_file_from_argv(Config)
+    if os.path.isfile(__file__[0: __file__.rfind('.')] + r'.json'):
+        cfg_file = __file__[0: __file__.rfind('.')] + r'.json'
+    else:
+        cfg_file = None
+    CONFIG = Config.parse_config_file_from_argv(Config, cfg_file)
     cl = Spider(CONFIG.db_file)
     util.SignalHandlerBase(callback=lambda cl: cl.stop())
     try:
