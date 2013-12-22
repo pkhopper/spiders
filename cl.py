@@ -6,14 +6,8 @@ import clutil
 from vavava import httputil as http
 from vavava import util
 from vavava import sqliteutil
-from vavava import json_config
 
-class Config(json_config.SimpleJsonConfig):
-    def __init__(self, path):
-        json_config.SimpleJsonConfig.__init__(self, path)
-        util.get_logger().info("load config file:%s", path)
-        if not hasattr(self, "http_proxy") or len(self.http_proxy)==0:
-            self.http_proxy = None
+CONFIG = util.JsonConfig()
 
 class Spider:
     def __init__(self, db_path):
@@ -23,7 +17,7 @@ class Spider:
         self.dbpool = sqliteutil.dbpool(path=db_path, cls=clutil.DBUrl)
 
     def get_page_list(self):
-        ht = http.HttpUtil(charset=CONFIG.charset, proxy=CONFIG.http_proxy)
+        ht = http.HttpUtil(charset=CONFIG.charset, proxy=CONFIG.proxy)
         html = ht.get(CONFIG.url_indexpage).decode(CONFIG.charset)
         ids = util.reg_helper(html, CONFIG.regular_index)
         for id in ids:
@@ -33,7 +27,7 @@ class Spider:
 
     def get_pages(self, category, pn):
         self.log.debug('[page] cid=%s pn=%s', category, pn)
-        ht = http.HttpUtil(charset=CONFIG.charset, proxy=CONFIG.http_proxy)
+        ht = http.HttpUtil(charset=CONFIG.charset, proxy=CONFIG.proxy)
         url = CONFIG.format_infourl % (category, pn)
         html = ht.get(url).decode(CONFIG.charset)
         tree = etree.HTML(html)
@@ -55,7 +49,7 @@ class Spider:
                 self.log.exception(e)
 
     def get_post_time(self, url):
-        html = http.HttpUtil(proxy=CONFIG.http_proxy).get(url).decode(CONFIG.charset)
+        html = http.HttpUtil(proxy=CONFIG.proxy).get(url).decode(CONFIG.charset)
         reg = r'Posted:\s*(?P<tt>\d*[--|-]\d*[--|-]\d*[\s|@]\d*:\d*)'
         return util.reg_helper(html, reg)[0].replace('--', '-').replace('@', ' ')
 
@@ -88,13 +82,8 @@ class Spider:
             self.dbpool.stop()
 
 if __name__ == "__main__":
-    import os
-    global CONFIG
-    if os.path.isfile(__file__[0: __file__.rfind('.')] + r'.json'):
-        cfg_file = __file__[0: __file__.rfind('.')] + r'.json'
-    else:
-        cfg_file = None
-    CONFIG = Config.parse_config_file_from_argv(Config, cfg_file)
+    cfg_file = __file__[0: __file__.rfind('.')] + r'.json'
+    CONFIG = util.JsonConfig(cfg_file, attrs=["proxy"])
     cl = Spider(CONFIG.db_file)
     util.SignalHandlerBase(callback=lambda cl: cl.stop())
     try:
