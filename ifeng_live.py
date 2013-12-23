@@ -111,7 +111,7 @@ if __name__ == "__main__":
 
     ifeng = Spider()
     try:
-        if duration > 0:
+        if len(sys.argv) > 1:
             LOG.info(u"[%s %.2fs %s]", channel, duration, path)
             util.SignalHandlerBase(callback=lambda : ifeng.download_handle.syn_stop())
             ifeng.start_recode(channel, duration, path)
