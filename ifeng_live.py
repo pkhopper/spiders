@@ -29,6 +29,9 @@ class Spider:
         self.channels = {}
         self.down_handle = None
 
+    def set_proxy(self, proxy):
+        self.http.set_proxy(proxy)
+
     def start_recode(self, channel_name, duration, output='./'):
         output = os.path.abspath(output)
         if not os.path.isdir(output):
@@ -99,20 +102,32 @@ if __name__ == "__main__":
     duration = 0
     channel = u"凤凰中文台"
     path = os.path.join(os.environ['HOME'], 'Downloads')
+    proxy = None
 
-    opts, args = getopt.getopt(sys.argv[1:], "d:c:p:", [])
+    opts, args = getopt.getopt(sys.argv[1:], "d:c:p:i", ["proxy"])
     for k, v in opts:
-        if k == "-d":
+        if k in ("-d"):
             duration = float(v)
-        if k == "-c":
+        elif k in ("-c"):
             channel = v
-        if k == "-p":
+        elif k in ("-p"):
             path = os.path.abspath(v)
+        elif k  in ("proxy"):
+            proxy = {"http": v}
+        elif k  in ("-i"):
+            channels, schedule = Spider().get_channel_info()
+            for k, v in channels.items():
+                print k, v, "\n"
+            exit(0)
+
 
     ifeng = Spider()
+    if proxy:
+        ifeng.set_proxy(proxy)
+        LOG.info("proxy = %s", proxy)
     try:
         if len(sys.argv) > 1:
-            LOG.info(u"[%s %.2fs %s]", channel, duration, path)
+            LOG.info(u"[%s %.2fs %s ]", channel, duration, path)
             util.SignalHandlerBase(callback=lambda : ifeng.download_handle.syn_stop())
             ifeng.start_recode(channel, duration, path)
             LOG.info(r"end of download work")
