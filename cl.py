@@ -83,7 +83,7 @@ class Spider:
 
 if __name__ == "__main__":
     cfg_file = __file__[0: __file__.rfind('.')] + r'.json'
-    CONFIG = util.JsonConfig(cfg_file, attrs=["proxy"])
+    CONFIG = util.JsonConfig(cfg_file, "proxy")
     cl = Spider(CONFIG.db_file)
     util.SignalHandlerBase(callback=lambda cl: cl.stop())
     try:
