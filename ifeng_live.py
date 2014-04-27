@@ -17,7 +17,7 @@ class Spider:
 
     def __init__(self):
         self.http = HttpUtil(charset="utf-8")
-        self.http.header_refer_ = "http://v.ifeng.com/include/ifengLivePlayer_v1.40.4.swf"
+        self.http.header_refer_ = "http://v.ifeng.com/include/ifengLivePlayer_v5.0.43_p.swf"
         self.http.header_user_agent_ = r"Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)"
         self.http.add_header("x-flash-version", "11,5,502,146")
         self.http.add_header("Accept-Language", "zh-CN")
@@ -38,8 +38,8 @@ class Spider:
             os.mkdir(output)
         outfile = os.path.join(output, util.get_time_string() + ".flv")
         LOG.info("[channel] %s", channel_name)
-        uuid = self._get_uuid(channel_name)
-        flv_location = self._get_flv_location(uuid)
+        uuid, url = self._get_uuid(channel_name)
+        flv_location = self._get_flv_location(uuid, url)
         LOG.info("[location] %s", flv_location)
         LOG.info("[output] %s", outfile)
         LOG.info("[start.... ] %s", util.get_time_string())
@@ -63,13 +63,12 @@ class Spider:
         url = self.channels[channel_name]['url']
         data = self.http.get(url)
         html = data.decode(CHARSET)
-        if html.find(r'uuid=') > 0:
-            reg_str = r'uuid=(?P<f>[^|]*)'
-        else:
-            reg_str = r'http://biz.vsdn.tv380.com/playlive.php\?(?P<f>[^|]*)'
-        self.uuid = util.reg_helper(html,reg_str)[0]
-        LOG.info("[UUID] %s", self.uuid)
-        return self.uuid
+        reg_str = r'uuid=(?P<f>[^|]*)'
+        uuid = util.reg_helper(html,reg_str)[0]
+        reg_str = r'(?P<f>http[^|]*)'
+        url = util.reg_helper(html,reg_str)[0]
+        LOG.info("[url1] %s", url)
+        return uuid, url
 
     def _get_param(self, uuid):
         time_string = str(int(time.time() + 300))
@@ -79,7 +78,7 @@ class Spider:
                 + hash_result[5:15] + "&ifenuserid="
         return param
 
-    def _get_flv_location(self, uuid):
+    def _get_flv_location(self, uuid, url):
         param = self._get_param(uuid)
         url = r'http://ifenglive.soooner.com/?uuid=%s' % (param)
         data = self.http.get(url)
