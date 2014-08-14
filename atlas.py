@@ -5,9 +5,11 @@ import os
 import sys
 import time
 import threading
+
 from vavava import util
-from vavava import httputil as http
 from vavava.spiderutil import SpiderUtil
+from vavava.vavava import httputil as http
+
 
 LOG = util.get_logger()
 CONFIG = util.JsonConfig()
@@ -25,11 +27,11 @@ class threadpoolhelper:
         self._run(alist, thread_number)
 
     def _run(self, arg_list, thread_number):
-        from vavava import threadpool
-        self.pool = threadpool.ThreadPool(thread_number)
-        requests = threadpool.makeRequests(lambda x: self.target(x), arg_list)
+        from vavava import threadutil
+        self.pool = threadutil.ThreadPool(thread_number)
+        requests = threadutil.makeRequests(lambda x: self.target(x), arg_list)
         [self.pool.putRequest(req) for req in requests]
-        self.pool.wait()
+        self.pool.waitForStop()
         print "========== EOF ==========="
 
     def stop(self):
